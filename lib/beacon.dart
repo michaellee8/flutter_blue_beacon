@@ -6,10 +6,8 @@ import 'dart:math';
 import 'package:flutter_blue_beacon/utils.dart';
 export 'package:flutter_blue/flutter_blue.dart' show ScanResult;
 
-
-
 const EddystoneServiceId = "0000feaa-0000-1000-8000-00805f9b34fb";
-
+const IBeaconManufacturerId = 0x004C;
 
 // This file defines type that are considered as a valid beacon.
 
@@ -36,25 +34,22 @@ abstract class Beacon {
   const Beacon({@required this.tx, @required this.scanResult});
 
   // Returns the first found beacon protocol in one device
-  factory Beacon.fromScanResult(ScanResult scanResult) {
-    // Detect Eddystone
-    if (scanResult.advertisementData.serviceData
-        .containsKey(EddystoneServiceId)) {
-      // Detect EddystoneUID
-      if (scanResult.advertisementData
-              .serviceData[EddystoneServiceId][0] ==
-          0x00) {
-        return EddystoneUID.fromScanResult(scanResult);
-      }
-    }
-    return null;
+  static List<Beacon> fromScanResult(ScanResult scanResult) {
+    return <Beacon>[
+      EddystoneUID.fromScanResult(scanResult),
+    ].where((b) => b != null).toList();
   }
 }
 
 // Base class of all Eddystone beacons
 abstract class Eddystone extends Beacon {
-  const Eddystone({@required int tx, @required ScanResult scanResult})
+  const Eddystone(
+      {@required this.frameType,
+      @required int tx,
+      @required ScanResult scanResult})
       : super(tx: tx, scanResult: scanResult);
+
+  final int frameType;
 
   @override
   double get distance {
@@ -68,37 +63,34 @@ abstract class Eddystone extends Beacon {
 }
 
 class EddystoneUID extends Eddystone {
-  final int frameType;
   final String namespaceId;
   final String beaconId;
 
   const EddystoneUID(
-      {@required this.frameType,
+      {@required int frameType,
       @required this.namespaceId,
       @required this.beaconId,
       @required int tx,
       @required ScanResult scanResult})
-      : super(tx: tx, scanResult: scanResult);
+      : super(tx: tx, scanResult: scanResult, frameType: frameType);
 
   factory EddystoneUID.fromScanResult(ScanResult scanResult) {
     if (!scanResult.advertisementData.serviceData
         .containsKey(EddystoneServiceId)) {
       return null;
     }
-    if (scanResult.advertisementData
-            .serviceData[EddystoneServiceId].length <
+    if (scanResult.advertisementData.serviceData[EddystoneServiceId].length <
         18) {
       return null;
     }
-    if (scanResult.advertisementData
-            .serviceData[EddystoneServiceId][0] !=
+    if (scanResult.advertisementData.serviceData[EddystoneServiceId][0] !=
         0x00) {
       return null;
     }
-    List<int> rawBytes = scanResult
-        .advertisementData.serviceData[EddystoneServiceId];
+    List<int> rawBytes =
+        scanResult.advertisementData.serviceData[EddystoneServiceId];
     var frameType = rawBytes[0];
-    var tx = byteToInt32(rawBytes[1]);
+    var tx = byteToInt8(rawBytes[1]);
     var namespaceId = byteListToHexString(rawBytes.sublist(2, 12));
     var beaconId = byteListToHexString(rawBytes.sublist(12, 18));
     return EddystoneUID(
@@ -107,5 +99,88 @@ class EddystoneUID extends Eddystone {
         beaconId: beaconId,
         tx: tx,
         scanResult: scanResult);
+  }
+}
+
+class EddystoneEID extends Eddystone {
+  final String ephemeralId;
+
+  const EddystoneEID(
+      {@required int frameType,
+      @required this.ephemeralId,
+      @required int tx,
+      @required ScanResult scanResult})
+      : super(tx: tx, scanResult: scanResult, frameType: frameType);
+
+  factory EddystoneEID.fromScanResult(ScanResult scanResult) {
+    if (!scanResult.advertisementData.serviceData
+        .containsKey(EddystoneServiceId)) {
+      return null;
+    }
+    if (scanResult.advertisementData.serviceData[EddystoneServiceId].length <
+        10) {
+      return null;
+    }
+    if (scanResult.advertisementData.serviceData[EddystoneServiceId][0] !=
+        0x30) {
+      return null;
+    }
+    List<int> rawBytes =
+        scanResult.advertisementData.serviceData[EddystoneServiceId];
+    var frameType = rawBytes[0];
+    var tx = byteToInt8(rawBytes[1]);
+    var ephemeralId = byteListToHexString(rawBytes.sublist(2, 9));
+    return EddystoneEID(
+        frameType: frameType,
+        ephemeralId: ephemeralId,
+        tx: tx,
+        scanResult: scanResult);
+  }
+}
+
+class IBeacon extends Beacon {
+  final String uuid;
+  final int major;
+  final int minor;
+
+  const IBeacon(
+      {@required this.uuid,
+      @required this.major,
+      @required this.minor,
+      @required int tx,
+      @required ScanResult scanResult})
+      : super(tx: tx, scanResult: scanResult);
+
+  factory IBeacon.fromScanResult(ScanResult scanResult) {
+    if (!scanResult.advertisementData.manufacturerData
+        .containsKey(IBeaconManufacturerId)) {
+      return null;
+    }
+    if (scanResult
+            .advertisementData.manufacturerData[IBeaconManufacturerId].length <
+        23) {
+      return null;
+    }
+    if (scanResult.advertisementData.manufacturerData[IBeaconManufacturerId]
+                [0] !=
+            0x02 ||
+        scanResult.advertisementData.manufacturerData[IBeaconManufacturerId]
+                [1] !=
+            0x15) {
+      return null;
+    }
+    List<int> rawBytes =
+        scanResult.advertisementData.manufacturerData[IBeaconManufacturerId];
+    var uuid = byteListToHexString(rawBytes.sublist(2, 18));
+    var major = twoByteToInt16(rawBytes[18], rawBytes[19]);
+    var minor = twoByteToInt16(rawBytes[20], rawBytes[21]);
+    var tx = byteToInt8(rawBytes[22]);
+    return IBeacon(
+      uuid: uuid,
+      major: major,
+      minor: minor,
+      tx: tx,
+      scanResult: scanResult,
+    );
   }
 }

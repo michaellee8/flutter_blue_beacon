@@ -31,6 +31,7 @@ class FlutterBlueBeacon {
               withServices: [Guid("0000FEAA-0000-1000-8000-00805F9B34FB")],
               timeout: timeout)
           .map((scanResult) => Beacon.fromScanResult(scanResult))
+          .expand((b) => b)
           .where((b) => (b is EddystoneUID));
     }
     return Stream.fromIterable(List<Beacon>());
