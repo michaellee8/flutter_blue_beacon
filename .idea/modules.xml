@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/flutter_ble_beacon.iml" filepath="$PROJECT_DIR$/flutter_ble_beacon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/flutter_blue_beacon.iml" filepath="$PROJECT_DIR$/flutter_blue_beacon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/example/flutter_blue_beacon_example.iml" filepath="$PROJECT_DIR$/example/flutter_blue_beacon_example.iml" />
     </modules>
   </component>
 </project>

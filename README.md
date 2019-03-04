@@ -1,6 +1,21 @@
-# flutter_ble_beacon
+# flutter_blue_beacon
 
-A Eddystone and iBeacon implementation native to flutter using the flutter_blue plugin.
+A Bluetooth Low Energy (BLE) beacon implementation native to flutter using the `flutter_blue` plugin.
+
+Current implementation status: 
+
+| Protocol                     | Android | iOS  |
+| :---------------             | :-----: | :--- |
+| iBeacon                      |   No    |  No  |
+| AltBeacon                    |   No    |  No  |
+| EddystoneUID                 |   Yes   |  Yes |
+| EddystoneEID                 |   No    |  No  |
+| EddystoneTLM (Unencrypted)   |   No    |  No  |
+| EddystoneTLM (Encrypted)     |   No    |  No  |
+| EddystoneURL                 |   No    |  No  |
+
+Feel free to contribute and add support to more protocols!  
+A good start for implementing Eddystone: https://github.com/evothings/cordova-eddystone
 
 ## Getting Started
 
