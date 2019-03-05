@@ -4,19 +4,22 @@ A Bluetooth Low Energy (BLE) beacon implementation native to flutter using the `
 
 Current implementation status: 
 
-| Protocol                     | Android | iOS*  |
+| Protocol                     | Android | iOS* |
 | :---------------             | :-----: | :--- |
-| iBeacon                      |   No    |  No  |
+| iBeacon                      |   Yes   |  ?   |
 | AltBeacon                    |   No    |  No  |
-| EddystoneUID                 |   Yes   |  Yes |
-| EddystoneEID                 |   No    |  No  |
+| EddystoneUID                 |   Yes   |  ?   |
+| EddystoneEID                 |   Yes   |  ?   |
 | EddystoneTLM (Unencrypted)   |   No    |  No  |
 | EddystoneTLM (Encrypted)     |   No    |  No  |
 | EddystoneURL                 |   No    |  No  |
-* iOS code are not tested, feel free to report any problems
+* iOS code are not tested, feel free to test it for me and report any problems.
+* I have heard that iBeacon scans on iOS are not possible without using native APIs, 
+if this is true, then iBeacon support for iOS in this library will be impossible since this library conducts low-level
+BLE scans and then translates it according to beacon protocols.
 
 Feel free to contribute and add support to more protocols!  
-A good start for implementing Eddystone: https://github.com/evothings/cordova-eddystone
+A good start for implementing Eddystone: https://github.com/evothings/cordova-eddystone  
 A good start for implementing iBeacon: https://stackoverflow.com/questions/18906988/what-is-the-ibeacon-bluetooth-profile
 
 ## Getting Started
