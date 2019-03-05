@@ -1,5 +1,3 @@
-library flutter_blue_beacon;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:math';
@@ -17,20 +15,24 @@ abstract class Beacon {
   final int tx;
   final ScanResult scanResult;
 
+  int get rssi => scanResult.rssi;
+
+  String get name => scanResult.device.name;
+
+  String get id => scanResult.device.id.id;
+
+  int get hash;
+
+  int get txAt1Meter => tx;
+
   double get distance {
-    double ratio = rssi * 1.0 / tx;
+    double ratio = rssi * 1.0 / (txAt1Meter);
     if (ratio < 1.0) {
       return pow(ratio, 10);
     } else {
       return (0.89976) * pow(ratio, 7.7095) + 0.111;
     }
   }
-
-  int get rssi => scanResult.rssi;
-
-  String get name => scanResult.device.name;
-
-  String get id => scanResult.device.id.id;
 
   const Beacon({@required this.tx, @required this.scanResult});
 
@@ -55,14 +57,7 @@ abstract class Eddystone extends Beacon {
   final int frameType;
 
   @override
-  double get distance {
-    double ratio = rssi * 1.0 / (tx - 41);
-    if (ratio < 1.0) {
-      return pow(ratio, 10);
-    } else {
-      return (0.89976) * pow(ratio, 7.7095) + 0.111;
-    }
-  }
+  int get txAt1Meter => tx - 41;
 }
 
 class EddystoneUID extends Eddystone {
@@ -104,7 +99,7 @@ class EddystoneUID extends Eddystone {
         scanResult: scanResult);
   }
 
-  int get hashCode => hashObjects([
+  int get hash => hashObjects([
         "EddystoneUID",
         EddystoneServiceId,
         this.frameType,
@@ -112,8 +107,6 @@ class EddystoneUID extends Eddystone {
         this.beaconId,
         this.tx
       ]);
-
-  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
 
 class EddystoneEID extends Eddystone {
@@ -151,15 +144,13 @@ class EddystoneEID extends Eddystone {
         scanResult: scanResult);
   }
 
-  int get hashCode => hashObjects([
+  int get hash => hashObjects([
         "EddystoneEID",
         EddystoneServiceId,
         this.frameType,
         this.ephemeralId,
         this.tx
       ]);
-
-  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
 
 class IBeacon extends Beacon {
@@ -208,7 +199,7 @@ class IBeacon extends Beacon {
     );
   }
 
-  int get hashCode => hashObjects([
+  int get hash => hashObjects([
         "IBeacon",
         IBeaconManufacturerId,
         this.uuid,
@@ -216,6 +207,4 @@ class IBeacon extends Beacon {
         this.minor,
         this.tx
       ]);
-
-  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
