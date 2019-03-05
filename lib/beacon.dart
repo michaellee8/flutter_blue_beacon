@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:math';
 import 'package:flutter_blue_beacon/utils.dart';
+import 'package:quiver/core.dart';
 export 'package:flutter_blue/flutter_blue.dart' show ScanResult;
 
 const EddystoneServiceId = "0000feaa-0000-1000-8000-00805f9b34fb";
@@ -37,6 +38,8 @@ abstract class Beacon {
   static List<Beacon> fromScanResult(ScanResult scanResult) {
     return <Beacon>[
       EddystoneUID.fromScanResult(scanResult),
+      EddystoneEID.fromScanResult(scanResult),
+      IBeacon.fromScanResult(scanResult),
     ].where((b) => b != null).toList();
   }
 }
@@ -100,6 +103,17 @@ class EddystoneUID extends Eddystone {
         tx: tx,
         scanResult: scanResult);
   }
+
+  int get hashCode => hashObjects([
+        "EddystoneUID",
+        EddystoneServiceId,
+        this.frameType,
+        this.namespaceId,
+        this.beaconId,
+        this.tx
+      ]);
+
+  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
 
 class EddystoneEID extends Eddystone {
@@ -136,6 +150,16 @@ class EddystoneEID extends Eddystone {
         tx: tx,
         scanResult: scanResult);
   }
+
+  int get hashCode => hashObjects([
+        "EddystoneEID",
+        EddystoneServiceId,
+        this.frameType,
+        this.ephemeralId,
+        this.tx
+      ]);
+
+  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
 
 class IBeacon extends Beacon {
@@ -183,4 +207,15 @@ class IBeacon extends Beacon {
       scanResult: scanResult,
     );
   }
+
+  int get hashCode => hashObjects([
+        "IBeacon",
+        IBeaconManufacturerId,
+        this.uuid,
+        this.major,
+        this.minor,
+        this.tx
+      ]);
+
+  bool operator ==(dynamic other) => this.hashCode == other.hashCode;
 }
