@@ -1,3 +1,4 @@
+import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'dart:math';
@@ -136,7 +137,8 @@ class EddystoneEID extends Eddystone {
         scanResult.advertisementData.serviceData[EddystoneServiceId];
     var frameType = rawBytes[0];
     var tx = byteToInt8(rawBytes[1]);
-    var ephemeralId = byteListToHexString(rawBytes.sublist(2, 9));
+    //var ephemeralId = byteListToHexString(rawBytes.sublist(2, 9));
+    var ephemeralId = hex.encode(rawBytes).toString().substring(4);
     return EddystoneEID(
         frameType: frameType,
         ephemeralId: ephemeralId,
